@@ -41,57 +41,38 @@ def rearrange_tiles(image_path: str, tile_size: tuple[int, int], ordering: list[
         img.close()
         raise ValueError("The tile size or ordering are not valid for the given image")
         
-    # Split the image, join it, write it to out_path
+    # Splitting the image
     
     regions = []
     
-    # dimensions may not be symmetrical
-    #  len / r_len = row_count
-    #  wid / r_wid = col_count
-    # list size = r * c
-    
-    rc = ih // th
-    cc = iw // tw
+    row_count = ih // th
+    col_count = iw // tw
 
     # ordering is left to right, top to bottom
-    # ! Not move left to right and top to bottom !
-    for r in range(rc):
+    for r in range(row_count):
         sy = r * th
-        for c in range(cc):
+        for c in range(col_count):
             sx = c * tw
             box = (sx, sy, sx + tw, sy + th)
             r = img.crop(box)
             regions.append(r)
     
-    # for c in range(cc):
-    #     for r in range(rc):
-    #         sx = c * tw
-    #         sy = r * th
-    #         box = (sx, sy, sx + tw, sy + th)
-    #         r = img.crop(box)
-    #         regions.append(r)
-    
-    # Reorder the images in regions according to the ordering
-    
+    # Sorting the regions according to ordering
     sorted_regions = []
     
     for index in ordering:
         r = regions[index]
         sorted_regions.append(r)
-        # regions[index].close()
-        regions[index] = None
     
     #? there is another way to do this maybe thats better cause that would involve skipping certain regions
     
-    regions_counter = 0 # region counter # ? We may not need this `regions_counter` variable
-    for r in range(rc):
+    for r in range(row_count):
         sy = r * th
-        for c in range(cc):
+        for c in range(col_count):
             sx = c * tw
             box = (sx, sy, sx + tw, sy + th)
-            img.paste(sorted_regions[regions_counter], box)
-            regions_counter += 1
+            region_counter = r * col_count + c
+            img.paste(sorted_regions[region_counter], box)
 
-    # img.show()
     img.save(out_path)
     img.close()
